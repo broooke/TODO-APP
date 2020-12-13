@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from .models import Task, TaskCompleted
 from .forms import *
+from django.contrib.auth.forms import AuthenticationForm
 
 # Create your views here.
 
@@ -14,6 +15,12 @@ def home(request):
 	 	if form.is_valid():
 	 		form.save()
 	 	return redirect('/')
+	for task in tasks:
+		if  task.complete==True:
+			task_complete = TaskCompleted(title_completed=task.title)
+			task.delete()
+			task_complete.save()
+			return redirect('/')
 	# try:
 	#  	for i in tasks:
 	#  		if i.complete==True:
@@ -41,17 +48,13 @@ def delete(request,task_id):
 	task.delete()
 	return redirect('/')
 
-def complete(request,task_id):
-	task = Task.objects.get(id=task_id)
-	task_completed = TaskCompleted(title_completed=task.title)
-	task.delete()
-	task_completed.save()
-	return redirect('/')
-
 def deletecompleted(request,task_id):
 	task = TaskCompleted.objects.get(id=task_id)
 	task.delete()
 	return redirect('/')
+
+def signup(request):
+	return render(request, 'signup.html')
 
 
 
