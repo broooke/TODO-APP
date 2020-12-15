@@ -3,6 +3,10 @@ from django.http import HttpResponse, HttpResponseRedirect
 from .models import Task, TaskCompleted
 from .forms import *
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate, logout
+from django.contrib import messages
+from django.contrib.auth import login as dj_login
+
 
 # Create your views here.
 
@@ -54,7 +58,37 @@ def deletecompleted(request,task_id):
 	return redirect('/')
 
 def signup(request):
-	return render(request, 'signup.html')
+	if request.method == 'POST':
+		form = SignUpForm(request.POST)
+		if form.is_valid():
+			form.save()
+	else:
+		form = SignUpForm()
+
+	dictionary = {'form':form}
+	return render(request, 'signup.html', dictionary)
+
+def login(request):
+	if request.method == 'POST':
+		form = AuthenticationForm(data=request.POST)
+		if form.is_valid():
+			username = request.POST.get('username')
+			password = request.POST.get('password')
+			user = authenticate(request, username=username, password=password)
+			if user is not None:
+				dj_login(request, user)
+				return redirect('/')
+			else:
+				messages.add_message(request, messages.INFO, 'Hello world.')
+	else:
+		form = AuthenticationForm()
+			
+	return render(request, 'login.html')
+
+def loginout(request):
+	logout(request)
+	return HttpResponseRedirect('/login/')
+
 
 
 
